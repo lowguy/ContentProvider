@@ -14,7 +14,11 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.ListView;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 组件篇 - ContentProvider
@@ -35,7 +39,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mPhoneList = (TextView) findViewById(R.id.phoneList);
+        List<ItemBean> itemBeanList = new ArrayList<>();
+
         ContentResolver cr = getContentResolver();
         Cursor c = cr.query(Contacts.CONTENT_URI, new String[]{Contacts._ID, Contacts.DISPLAY_NAME}, null, null, null);
         if (c != null) {
@@ -53,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
                         } else if (type == Phone.TYPE_MOBILE) {
                             Log.i("info", "手机" + c1.getString(c1.getColumnIndex(Phone.NUMBER)));
                         }
-                        mPhoneList.setText("姓名：" + c.getString(c.getColumnIndex("display_name")) + "电话：" + c1.getString(c1.getColumnIndex(Phone.NUMBER)));
+                        itemBeanList.add(new ItemBean(c.getString(c.getColumnIndex("display_name")),c1.getString(c1.getColumnIndex(Phone.NUMBER))));
                         //TODO 整理为列表显示
                     }
                     c1.close();
@@ -61,6 +66,8 @@ public class MainActivity extends AppCompatActivity {
                 //根据联系人的id查询联系人的额邮箱
             }
         }
+        ListView listView = (ListView) findViewById(R.id.listView);
+        listView.setAdapter(new MyAdapter(this,itemBeanList));
         //向联系人插入数据
         ContentValues values = new ContentValues();
         Uri uri = cr.insert(RawContacts.CONTENT_URI,values);
